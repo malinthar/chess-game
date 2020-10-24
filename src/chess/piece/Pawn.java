@@ -13,6 +13,7 @@ public class Pawn extends ChessPiece {
     private static final List<String> WHITE_DIRECTIONS = Arrays.asList(NORTH);
     private static final List<String> BLACK_DIRECTIONS = Arrays.asList(SOUTH);
     private static final Map<String, List<String>> DIRECTIONS = new HashMap<>();
+    private String promotion = "Q";
 
     static {
         DIRECTIONS.put(ChessBoard.WHITE_KIND, WHITE_DIRECTIONS);
@@ -75,36 +76,23 @@ public class Pawn extends ChessPiece {
 
     @Override
     public Boolean move(FileRank toPosition, Boolean modifyPosition) {
-        Boolean isValid = false;
+        Boolean isValid;
         String toFileRank = toPosition.getFileRank().get(FileRank.FILE_KEY) +
                 toPosition.getFileRank().get(FileRank.RANK_KEY);
         int maxSteps = getMaxSteps();
         if (toPosition.getOccupant() == null) {
-            for (String position : getValidMoves(DIRECTIONS.get(this.kind), maxSteps,
-                    this.currentPosition, toFileRank)) {
-                if (toFileRank.equals(position)) {
-                    if(modifyPosition && getIsCheck(toFileRank)) {
-                        isValid = true;
-                        this.currentPosition = toPosition;
-                    } else if (modifyPosition){
-                        isValid = false;
-                    } else{
-                        isValid = true;
-                    }
-                    break;
-                }
-            }
+            return validateMoveAndUpdatePosition(
+                    getValidMoves(DIRECTIONS.get(this.kind),
+                    maxSteps,this.currentPosition,toFileRank),
+                    toFileRank,modifyPosition,toPosition);
         } else {
-            isValid = moveDiagonal(toPosition);
-            if (isValid) {
-                if(modifyPosition && getIsCheck(toFileRank)) {
-                    isValid = true;
+            if (moveDiagonal(toPosition) && !getIsKingChecked(toFileRank)) {
+                isValid = true;
+                if(modifyPosition) {
                     this.currentPosition = toPosition;
-                } else if (modifyPosition){
-                    isValid = false;
-                } else {
-                    isValid = true;
                 }
+            } else {
+                isValid = false;
             }
         }
         return isValid;
@@ -117,5 +105,13 @@ public class Pawn extends ChessPiece {
         } else {
             return "w" + SYMBOL;
         }
+    }
+
+    public void setPromotion(String promotion) {
+        this.promotion = promotion;
+    }
+
+    public String getPromotion() {
+        return this.promotion;
     }
 }

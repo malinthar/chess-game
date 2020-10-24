@@ -6,6 +6,7 @@ import chess.FileRank;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public abstract class ChessPiece {
     protected FileRank currentPosition;
@@ -18,7 +19,9 @@ public abstract class ChessPiece {
     protected static final String SOUTH_WEST = "SOUTH_WEST";
     protected static final String WEST = "WEST";
     protected static final String NORTH_WEST = "NORTH_WEST";
-    protected static final String L_SHAPE = "L_SHAPE";
+    protected static final String LSHAPE = "LSHAPE";
+    protected static final String CASTLE = "CASTLE";
+
     protected ChessBoard chessBoard;
 
     public abstract Boolean move(FileRank toPosition, Boolean modifyPosition);
@@ -51,7 +54,6 @@ public abstract class ChessPiece {
      * @param toFileRank
      * @return
      */
-
     public List<String> getValidMoves(List<String> directions, int maxSteps,
                                       FileRank fromPosition, String toFileRank) {
         List<String> validMoves = new ArrayList<>();
@@ -67,9 +69,9 @@ public abstract class ChessPiece {
                     steps = 0;
                     for (int rank = rankIndex - 1; rank > -1 && steps < maxSteps; rank--) {
                         String targetFileRank = ChessBoard.FILES[fileIndex] + ChessBoard.RANKS[rank];
-                        if (isValidMove(targetFileRank, toFileRank)) {
+                        if (isClearPath(targetFileRank, toFileRank)) {
                             validMoves.add(targetFileRank);
-                            steps = +1;
+                            steps += 1;
                         } else {
                             break;
                         }
@@ -80,9 +82,9 @@ public abstract class ChessPiece {
                     for (int p = 1; rankIndex - p > -1 && fileIndex + p < ChessBoard.FILES.length &&
                             steps < maxSteps; p++) {
                         String targetFileRank = ChessBoard.FILES[fileIndex + p] + ChessBoard.RANKS[rankIndex - p];
-                        if (isValidMove(targetFileRank, toFileRank)) {
+                        if (isClearPath(targetFileRank, toFileRank)) {
                             validMoves.add(targetFileRank);
-                            steps = +1;
+                            steps += 1;
                         } else {
                             break;
                         }
@@ -92,9 +94,9 @@ public abstract class ChessPiece {
                     steps = 0;
                     for (int file = fileIndex + 1; file < ChessBoard.FILES.length && steps < maxSteps; file++) {
                         String targetFileRank = ChessBoard.FILES[file] + ChessBoard.RANKS[rankIndex];
-                        if (isValidMove(targetFileRank, toFileRank)) {
+                        if (isClearPath(targetFileRank, toFileRank)) {
                             validMoves.add(targetFileRank);
-                            steps = +1;
+                            steps += 1;
                         } else {
                             break;
                         }
@@ -102,12 +104,12 @@ public abstract class ChessPiece {
                     break;
                 case SOUTH_EAST:
                     steps = 0;
-                    for (int p = 1; rankIndex + p > ChessBoard.RANKS.length &&
+                    for (int p = 1; rankIndex + p < ChessBoard.RANKS.length &&
                             fileIndex + p < ChessBoard.FILES.length && steps < maxSteps; p++) {
                         String targetFileRank = ChessBoard.FILES[fileIndex + p] + ChessBoard.RANKS[rankIndex + p];
-                        if (isValidMove(targetFileRank, toFileRank)) {
+                        if (isClearPath(targetFileRank, toFileRank)) {
                             validMoves.add(targetFileRank);
-                            steps = +1;
+                            steps += 1;
                         } else {
                             break;
                         }
@@ -117,9 +119,9 @@ public abstract class ChessPiece {
                     steps = 0;
                     for (int rank = rankIndex + 1; rank < ChessBoard.RANKS.length && steps < maxSteps; rank++) {
                         String targetFileRank = ChessBoard.FILES[fileIndex] + ChessBoard.RANKS[rank];
-                        if (isValidMove(targetFileRank, toFileRank)) {
+                        if (isClearPath(targetFileRank, toFileRank)) {
                             validMoves.add(targetFileRank);
-                            steps = +1;
+                            steps += 1;
                         } else {
                             break;
                         }
@@ -127,12 +129,12 @@ public abstract class ChessPiece {
                     break;
                 case SOUTH_WEST:
                     steps = 0;
-                    for (int p = 1; rankIndex + p > ChessBoard.RANKS.length
+                    for (int p = 1; rankIndex + p < ChessBoard.RANKS.length
                             && fileIndex - p > -1 && steps < maxSteps; p++) {
                         String targetFileRank = ChessBoard.FILES[fileIndex - p] + ChessBoard.RANKS[rankIndex + p];
-                        if (isValidMove(targetFileRank, toFileRank)) {
+                        if (isClearPath(targetFileRank, toFileRank)) {
                             validMoves.add(targetFileRank);
-                            steps = +1;
+                            steps += 1;
                         } else {
                             break;
                         }
@@ -142,9 +144,9 @@ public abstract class ChessPiece {
                     steps = 0;
                     for (int file = fileIndex - 1; file > -1 && steps < maxSteps; file--) {
                         String targetFileRank = ChessBoard.FILES[file] + ChessBoard.RANKS[rankIndex];
-                        if (isValidMove(targetFileRank, toFileRank)) {
+                        if (isClearPath(targetFileRank, toFileRank)) {
                             validMoves.add(targetFileRank);
-                            steps = +1;
+                            steps += 1;
                         } else {
                             break;
                         }
@@ -154,12 +156,44 @@ public abstract class ChessPiece {
                     steps = 0;
                     for (int p = 1; rankIndex - p > -1 && fileIndex - p > -1 && steps < maxSteps; p++) {
                         String targetFileRank = ChessBoard.FILES[fileIndex - p] + ChessBoard.RANKS[rankIndex - p];
-                        if (isValidMove(targetFileRank, toFileRank)) {
+                        if (isClearPath(targetFileRank, toFileRank)) {
                             validMoves.add(targetFileRank);
-                            steps = +1;
+                            steps += 1;
                         } else {
                             break;
                         }
+                    }
+                    break;
+
+                case LSHAPE:
+                    int filesLength = ChessBoard.FILES.length;
+                    int ranksLength = ChessBoard.RANKS.length;
+                    if (fileIndex + 2 < filesLength && rankIndex + 1 < ranksLength) {
+                        validMoves.add(ChessBoard.FILES[fileIndex + 2] + ChessBoard.RANKS[rankIndex + 1]);
+                    }
+                    if (fileIndex + 1 < filesLength && rankIndex + 2 < ranksLength) {
+                        validMoves.add(ChessBoard.FILES[fileIndex + 1] + ChessBoard.RANKS[rankIndex + 2]);
+                    }
+                    if (fileIndex - 1 > -1 && rankIndex + 2 < ranksLength) {
+                        validMoves.add(ChessBoard.FILES[fileIndex - 1] + ChessBoard.RANKS[rankIndex + 2]);
+                    }
+                    if (fileIndex - 2 > -1 && rankIndex + 1 < ranksLength) {
+                        validMoves.add(ChessBoard.FILES[fileIndex - 2] + ChessBoard.RANKS[rankIndex + 1]);
+                    }
+                    if (fileIndex - 2 > -1 && rankIndex - 1 > -1) {
+                        validMoves.add(ChessBoard.FILES[fileIndex - 2] + ChessBoard.RANKS[rankIndex - 1]);
+                    }
+                    if (fileIndex - 1 > -1 && rankIndex - 2 > -1) {
+                        validMoves.add(ChessBoard.FILES[fileIndex - 1] + ChessBoard.RANKS[rankIndex - 2]);
+                    }
+                    if (fileIndex + 1 < filesLength && rankIndex - 2 > -1) {
+                        validMoves.add(ChessBoard.FILES[fileIndex + 1] + ChessBoard.RANKS[rankIndex - 2]);
+                    }
+                    if (fileIndex + 2 < filesLength && rankIndex - 1 > -1) {
+                        validMoves.add(ChessBoard.FILES[fileIndex + 2] + ChessBoard.RANKS[rankIndex - 1]);
+                    }
+                    if (fileIndex + 2 < filesLength && rankIndex + 1 < filesLength) {
+                        validMoves.add(ChessBoard.FILES[fileIndex + 2] + ChessBoard.RANKS[rankIndex + 1]);
                     }
                     break;
             }
@@ -174,19 +208,17 @@ public abstract class ChessPiece {
      * @param toFileRank
      * @return
      */
-    public Boolean isValidMove(String targetFileRank, String toFileRank) {
+    public Boolean isClearPath(String targetFileRank, String toFileRank) {
         Boolean isValid;
         //Check if there is an obstructing ChessPiece on the path to the destination.
         if (this.chessBoard.getChessBoard().get(targetFileRank).getOccupant() != null) {
             //check whether the target is not obstructed  and the King is safe.
-            if(toFileRank == null) {
+            if (targetFileRank.equals(toFileRank)
+                    && !((ChessPiece) (this.chessBoard.getChessBoard().
+                    get(targetFileRank).getOccupant())).getKind().equals(this.kind)) {
                 isValid = true;
             } else {
-                if (targetFileRank.equals(toFileRank)) {
-                    isValid = true;
-                } else {
-                    isValid = false;
-                }
+                isValid = false;
             }
         } else {
             isValid = true;
@@ -194,19 +226,43 @@ public abstract class ChessPiece {
         return isValid;
     }
 
-    public Boolean getIsCheck(String toFileRank) {
-        Boolean isValid;
-        FileRank position = this.currentPosition;
+    public Boolean getIsKingChecked(String toFileRank) {
+        Boolean isChecked;
+        FileRank tempPosition = this.currentPosition;
         Object tempOccupant = chessBoard.getChessBoard().get(toFileRank).getOccupant();
         this.currentPosition = chessBoard.getChessBoard().get(toFileRank);
-        if (!(this.chessBoard.getKing(this.kind).identifyCheck())) {
-            isValid = true;
+        this.chessBoard.getChessBoard().get(tempPosition.getFileRankString()).setOccupant(null);
+        this.chessBoard.getChessBoard().get(toFileRank).setOccupant(this);
+        if (this.chessBoard.getKing(this.kind).identifyCheck()) {
+            isChecked = true;
         } else {
-            isValid = false;
+            isChecked = false;
         }
-        this.currentPosition = position;
-        this.chessBoard.getChessBoard().get(position.getFileRankString()).setOccupant(this);
+        this.currentPosition = tempPosition;
+        this.chessBoard.getChessBoard().get(tempPosition.getFileRankString()).setOccupant(this);
         this.chessBoard.getChessBoard().get(toFileRank).setOccupant(tempOccupant);
+        return isChecked;
+    }
+
+    public Boolean validateMoveAndUpdatePosition(List<String> targetPositions,
+                                                 String toFileRank,
+                                                 Boolean modifyPosition,
+                                                 FileRank toPosition) {
+        Boolean isValid = false;
+        for (String position : targetPositions) {
+            if (toFileRank.equals(position) && !getIsKingChecked(toFileRank)) {
+                isValid = true;
+                if (modifyPosition) {
+                    if (this instanceof Rook) {
+                        ((Rook) this).setIsMoved(true);
+                    } else if (this instanceof King) {
+                        ((King) this).setIsMoved(true);
+                    }
+                    this.currentPosition = toPosition;
+                }
+                break;
+            }
+        }
         return isValid;
     }
 }

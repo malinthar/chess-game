@@ -51,26 +51,34 @@ public class ChessGame {
             } else if (inArr.length == 3 && DRAW_PROMPT.equals(inArr[2])) {
                 //todo: implement promotion
                 draw_prompt = true;
-            } else if (inArr.length == 2 | inArr.length == 3) {
-                Boolean isValid = chessBoard.move(inArr[0], inArr[1], turn);
-                //todo: Check and CheckMate, Castle, Enpassant, Promotion,
+            } else if (draw_prompt && inArr.length == 1 && DRAW.equals(inArr[0])) {
+                break;
+            }  else if (inArr.length == 2 | inArr.length == 3) {
+                Boolean isValid;
+                if(inArr.length == 2) {
+                    isValid = chessBoard.move(inArr[0], inArr[1], turn);
+                } else {
+                    isValid = chessBoard.promotePawn(inArr[0], inArr[1], turn, inArr[2]);
+                }
                 if (isValid) {
                     if (WHITE_TURN.equals(turn)) {
-                        if (chessBoard.getKing(ChessBoard.BLACK_KIND).getIsCheckMate()) {
-                            System.out.print(CHECKMATE + "\n");
-                            System.out.print(WHITE_WIN);
-                        } else {
-                            if (chessBoard.getKing(ChessBoard.BLACK_KIND).identifyCheck()) {
+                        if (chessBoard.getKing(ChessBoard.BLACK_KIND).identifyCheck()) {
+                            if (chessBoard.getKing(ChessBoard.BLACK_KIND).getIsCheckMate()) {
+                                System.out.print(CHECKMATE + "\n");
+                                System.out.print(WHITE_WIN);
+                                break;
+                            } else {
                                 System.out.print(CHECK);
                             }
                         }
                         turn = BLACK_TURN;
                     } else {
-                        if (chessBoard.getKing(ChessBoard.WHITE_KIND).getIsCheckMate()) {
-                            System.out.print(CHECKMATE + "\n");
-                            System.out.print(BLACK_WIN);
-                        } else {
-                            if (chessBoard.getKing(ChessBoard.WHITE_KIND).identifyCheck()) {
+                        if (chessBoard.getKing(ChessBoard.WHITE_KIND).identifyCheck()) {
+                            if (chessBoard.getKing(ChessBoard.WHITE_KIND).getIsCheckMate()) {
+                                System.out.print(CHECKMATE + "\n");
+                                System.out.print(BLACK_WIN);
+                                break;
+                            } else {
                                 System.out.print(CHECK);
                             }
                         }
@@ -79,10 +87,8 @@ public class ChessGame {
                 } else {
                     System.out.println(ILLEGAL_MOVE);
                 }
-            } else if (draw_prompt && inArr.length == 1 && DRAW.equals(inArr[0])) {
-                break;
             } else {
-                    System.out.println(ILLEGAL_MOVE);
+                System.out.println(ILLEGAL_MOVE);
             }
         }
 

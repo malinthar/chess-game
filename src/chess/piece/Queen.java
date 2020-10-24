@@ -5,13 +5,12 @@ import chess.FileRank;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 public class Queen extends ChessPiece {
 
     public static final List<String> INITIAL_POSITIONS = Arrays.asList("d");
     private static final String SYMBOL = "Q";
-    private static final List<String> directions = Arrays.asList(NORTH,NORTH_EAST,EAST,SOUTH_EAST,SOUTH,SOUTH_WEST,WEST,NORTH_WEST);
+    private static final List<String> VALID_MOVES = Arrays.asList(NORTH,NORTH_EAST,EAST,SOUTH_EAST,SOUTH,SOUTH_WEST,WEST,NORTH_WEST);
     public static final int MAX_STEPS = 8;
 
     public Queen(String kind, ChessBoard chessBoard) {
@@ -29,21 +28,8 @@ public class Queen extends ChessPiece {
 
     @Override
     public Boolean move(FileRank toPosition, Boolean modifyPosition) {
-        Boolean isValid = false;
         String toFileRank = toPosition.getFileRank().get(FileRank.FILE_KEY) + toPosition.getFileRank().get(FileRank.RANK_KEY);
-        for (String position : getValidMoves(directions, MAX_STEPS , this.currentPosition,toFileRank)) {
-            if (toFileRank.equals(position)) {
-                if(modifyPosition && getIsCheck(toFileRank)) {
-                    isValid = true;
-                    this.currentPosition = toPosition;
-                } else if (modifyPosition){
-                    isValid = false;
-                } else{
-                    isValid = true;
-                }
-                break;
-            }
-        }
-        return isValid;
+        return validateMoveAndUpdatePosition( getValidMoves(VALID_MOVES, MAX_STEPS,
+                this.currentPosition, toFileRank),toFileRank,modifyPosition,toPosition);
     }
 }

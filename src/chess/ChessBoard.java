@@ -8,7 +8,10 @@ import chess.piece.Pawn;
 import chess.piece.Queen;
 import chess.piece.Rook;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ChessBoard {
@@ -18,6 +21,9 @@ public class ChessBoard {
     private static final String BLACK_SQUARE = "##";
     public static final String WHITE_KIND = "WHITE";
     public static final String BLACK_KIND = "BLACK";
+    public static final String[] PROMOTIONS = {"Q","N","B","R"};
+    private List<ChessPiece> whitePieces = new ArrayList<>();
+    private List<ChessPiece> blackPieces = new ArrayList<>();
 
     private Map<String, FileRank> chessBoard = new HashMap<>();
     private King whiteKing;
@@ -87,6 +93,15 @@ public class ChessBoard {
                 }
             }
         }
+        for (FileRank fileRank : this.chessBoard.values()) {
+            if (fileRank.getOccupant() != null) {
+                if (((ChessPiece) fileRank.getOccupant()).getKind().equals(WHITE_KIND)) {
+                    whitePieces.add((ChessPiece) fileRank.getOccupant());
+                } else {
+                    blackPieces.add((ChessPiece) fileRank.getOccupant());
+                }
+            }
+        }
     }
 
     public Boolean move(String from, String to, String turn) {
@@ -100,34 +115,97 @@ public class ChessBoard {
                 if (restingPiece.getKind().equals(movingPiece.getKind())) {
                     isValid = false;
                 } else {
-                    isValid = movingPiece.move(toPosition,true);
+                    isValid = movingPiece.move(toPosition, true);
                 }
-            } else if(movingPiece.getKind().equals(turn)) {
-                isValid = movingPiece.move(toPosition,true);
-            }
-            else {
+            } else if (movingPiece.getKind().equals(turn)) {
+                isValid = movingPiece.move(toPosition, true);
+                if (movingPiece instanceof King && !isValid) {
+                    isValid = ((King) movingPiece).castleMove(toPosition.getFileRankString(), true);
+                }
+            } else {
                 isValid = false;
             }
-            if(isValid) {
-                chessBoard.get(to).setOccupant(movingPiece);
-                chessBoard.get(from).setOccupant(null);
+            if (isValid) {
+                if (turn.equals(WHITE_KIND)) {
+                    if (chessBoard.get(to).getOccupant() != null) {
+                        blackPieces.remove(chessBoard.get(to).getOccupant());
+                    }
+                } else {
+                    if (chessBoard.get(to).getOccupant() != null) {
+                        whitePieces.remove(chessBoard.get(to).getOccupant());
+                    }
+                }
+                if(movingPiece instanceof Pawn && turn.equals(WHITE_KIND) &&
+                        toPosition.getFileRank().get(FileRank.RANK_KEY).equals("8")) {
+                    ChessPiece newPiece;
+                    if(((Pawn) movingPiece).getPromotion().equals("Q")) {
+                        newPiece = new Queen(turn,this);
+                    } else if(((Pawn) movingPiece).getPromotion().equals("N")) {
+                        newPiece = new Knight(turn,this);
+                    } else if(((Pawn) movingPiece).getPromotion().equals("B")) {
+                        newPiece = new Bishop(turn,this);
+                    } else {
+                        newPiece = new Rook(turn, this);
+                    }
+                    newPiece.setCurrentPosition(toPosition);
+                    whitePieces.add(newPiece);
+                    toPosition.setOccupant(newPiece);
+                    whitePieces.remove(movingPiece);
+                    chessBoard.get(from).setOccupant(null);
+                } else if(movingPiece instanceof Pawn && turn.equals(BLACK_KIND) &&
+                        toPosition.getFileRank().get(FileRank.RANK_KEY).equals("1") ){
+                    ChessPiece newPiece;
+                    if(((Pawn) movingPiece).getPromotion().equals("Q")) {
+                        newPiece = new Queen(turn,this);
+                    } else if(((Pawn) movingPiece).getPromotion().equals("N")) {
+                        newPiece = new Knight(turn,this);
+                    } else if(((Pawn) movingPiece).getPromotion().equals("B")) {
+                        newPiece = new Bishop(turn,this);
+                    } else {
+                        newPiece = new Rook(turn, this);
+                    }
+                    newPiece.setCurrentPosition(toPosition);
+                    blackPieces.add(newPiece);
+                    toPosition.setOccupant(newPiece);
+                    blackPieces.remove(movingPiece);
+                    chessBoard.get(from).setOccupant(null);
+                } else{
+                    chessBoard.get(to).setOccupant(movingPiece);
+                    chessBoard.get(from).setOccupant(null);
+                }
             }
         } else {
             isValid = false;
         }
-
         return isValid;
     }
 
+    public Boolean promotePawn(String from, String to, String turn,String promotion) {
+        if(chessBoard.get(from).getOccupant() instanceof Pawn && Arrays.asList(PROMOTIONS).contains(promotion)) {
+            ((Pawn) chessBoard.get(from).getOccupant()).setPromotion(promotion);
+                move(from,to,turn);
+        }
+        return false;
+    }
+
     public King getKing(String kind) {
-        if(kind.equals(WHITE_KIND)) {
+        if (kind.equals(WHITE_KIND)) {
             return whiteKing;
         } else {
             return blackKing;
         }
     }
 
-    public Map<String,FileRank> getChessBoard() {
+    public List<ChessPiece> getPieces(String kind) {
+        if (kind.equals(WHITE_KIND)) {
+            return this.whitePieces;
+        } else {
+            return this.blackPieces;
+        }
+
+    }
+
+    public Map<String, FileRank> getChessBoard() {
         return this.chessBoard;
     }
 
