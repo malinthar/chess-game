@@ -2,11 +2,13 @@ package chess.piece;
 
 import chess.ChessBoard;
 import chess.FileRank;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Rook chess piece.
+ */
 public class Rook extends ChessPiece {
 
     public static final List<String> INITIAL_POSITIONS = Arrays.asList("a", "h");
@@ -32,13 +34,14 @@ public class Rook extends ChessPiece {
     public Boolean move(FileRank toPosition, Boolean modifyPosition) {
         String toFileRank = toPosition.getFileRank().get(FileRank.FILE_KEY) +
                 toPosition.getFileRank().get(FileRank.RANK_KEY);
-        return validateMoveAndUpdatePosition( getValidMoves(VALID_MOVES, MAX_STEPS,
-                this.currentPosition, toFileRank),toFileRank,modifyPosition,toPosition);
+        return validateMoveAndUpdatePosition(getValidMoves(VALID_MOVES, MAX_STEPS,
+                this.currentPosition, toFileRank), toFileRank, modifyPosition, toPosition);
     }
 
     public void setIsMoved(Boolean isMoved) {
         this.isMoved = isMoved;
     }
+
     public Boolean getIsMoved() {
         return this.isMoved;
     }

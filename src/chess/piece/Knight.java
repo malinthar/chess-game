@@ -3,10 +3,12 @@ package chess.piece;
 import chess.ChessBoard;
 import chess.FileRank;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Knight chess piece.
+ */
 public class Knight extends ChessPiece {
 
     public static final List<String> INITIAL_POSITIONS = Arrays.asList("b", "g");
@@ -29,7 +31,7 @@ public class Knight extends ChessPiece {
     @Override
     public Boolean move(FileRank toPosition, Boolean modifyPosition) {
         String toFileRank = toPosition.getFileRank().get(FileRank.FILE_KEY) + toPosition.getFileRank().get(FileRank.RANK_KEY);
-        return validateMoveAndUpdatePosition(getValidMoves(VALID_MOVES,3,this.currentPosition,toFileRank),
-                toFileRank,modifyPosition,toPosition);
+        return validateMoveAndUpdatePosition(getValidMoves(VALID_MOVES, 3, this.currentPosition, toFileRank),
+                toFileRank, modifyPosition, toPosition);
     }
 }

@@ -8,6 +8,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Pawn chess piece.
+ */
 public class Pawn extends ChessPiece {
     private static final String SYMBOL = "p";
     private static final List<String> WHITE_DIRECTIONS = Arrays.asList(NORTH);
@@ -15,6 +18,7 @@ public class Pawn extends ChessPiece {
     private static final Map<String, List<String>> DIRECTIONS = new HashMap<>();
     private String promotion = "Q";
 
+    //assign directions based on the kind.
     static {
         DIRECTIONS.put(ChessBoard.WHITE_KIND, WHITE_DIRECTIONS);
         DIRECTIONS.put(ChessBoard.BLACK_KIND, BLACK_DIRECTIONS);
@@ -24,6 +28,12 @@ public class Pawn extends ChessPiece {
         super(kind, chessBoard);
     }
 
+    /**
+     * Ensures that a chess piece of opponent kind is available to move diagonally,
+     * and returns if the move is valid.
+     * @param toPosition
+     * @return
+     */
     public Boolean moveDiagonal(FileRank toPosition) {
         String fromFile = this.currentPosition.getFileRank().get(FileRank.FILE_KEY);
         String fromRank = this.currentPosition.getFileRank().get(FileRank.RANK_KEY);
@@ -56,8 +66,7 @@ public class Pawn extends ChessPiece {
     }
 
     /**
-     * MaxSteps for Pawn
-     *
+     * Returns the MaxSteps for Pawn depending on the current position.
      * @return
      */
     public int getMaxSteps() {
@@ -107,10 +116,18 @@ public class Pawn extends ChessPiece {
         }
     }
 
+    /**
+     * Set the promotion type.
+     * @param promotion
+     */
     public void setPromotion(String promotion) {
         this.promotion = promotion;
     }
 
+    /**
+     * Returns the current promotion type.
+     * @return
+     */
     public String getPromotion() {
         return this.promotion;
     }

@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * King chess piece.
+ */
 public class King extends ChessPiece {
 
     public static final List<String> INITIAL_POSITIONS = Arrays.asList("e");
@@ -40,6 +43,10 @@ public class King extends ChessPiece {
                 toFileRank, modifyPosition, toPosition);
     }
 
+    /**
+     * Returns if the king(this) is check.
+     * @return
+     */
     public Boolean identifyCheck() {
         for (Map.Entry entry : this.chessBoard.getChessBoard().entrySet()) {
             Object occupant = ((FileRank) entry.getValue()).getOccupant();
@@ -53,6 +60,10 @@ public class King extends ChessPiece {
         return false;
     }
 
+    /**
+     * Returns if the king(this) or any other friendly chess piece has no move to get out of checkmate.
+     * @return
+     */
     public Boolean getIsCheckMate() {
         for (ChessPiece piece : this.chessBoard.getPieces(this.kind)) {
             for (FileRank fileRank : this.chessBoard.getChessBoard().values()) {
@@ -64,19 +75,36 @@ public class King extends ChessPiece {
         return true;
     }
 
+    /**
+     * Set the isMoved attribute to be used for castling.
+     * @param isMoved
+     */
     public void setIsMoved(Boolean isMoved) {
         this.isMoved = isMoved;
     }
 
+    /**
+     * Returns the isMoved status.
+     * @return
+     */
     public Boolean getIsMoved() {
         return this.isMoved;
     }
 
+    /**
+     * Performs castle move and returns its validity.
+     * @param toFileRank currentPosition
+     * @param modify targetPosition
+     * @return
+     */
     public Boolean castleMove(String toFileRank, Boolean modify) {
+        //Ensures the required context for a castle move
         if (!this.getIsMoved() && !this.identifyCheck()) {
+            //Get each rook of the kind of the king and valida the castle move for each of those.
             List<ChessPiece> rooks = this.chessBoard.getPieces(this.kind).stream().filter(piece -> piece instanceof Rook).collect(Collectors.toList());
             for (ChessPiece rook : rooks) {
                 if (!((Rook) rook).getIsMoved()) {
+                    //Queen side white
                     if (rook.getCurrentPosition().getFileRankString().equals("a1")) {
                         if (chessBoard.getChessBoard().get("d1").getOccupant() == null &&
                                 chessBoard.getChessBoard().get("c1").getOccupant() == null &&
@@ -93,6 +121,8 @@ public class King extends ChessPiece {
                                 return true;
                             }
                         }
+
+                    //king side white
                     } else if (rook.getCurrentPosition().getFileRankString().equals("h1")) {
                         if (chessBoard.getChessBoard().get("f1").getOccupant() == null &&
                                 chessBoard.getChessBoard().get("g1").getOccupant() == null &&
@@ -108,6 +138,8 @@ public class King extends ChessPiece {
                                 return true;
                             }
                         }
+
+                    //Queen side black
                     } else if (rook.getCurrentPosition().getFileRankString().equals("a8")) {
                         if (chessBoard.getChessBoard().get("d8").getOccupant() == null &&
                                 chessBoard.getChessBoard().get("c8").getOccupant() == null &&
@@ -124,6 +156,8 @@ public class King extends ChessPiece {
                                 return true;
                             }
                         }
+
+                    //King side black
                     } else {
                         if (chessBoard.getChessBoard().get("f8").getOccupant() == null &&
                                 chessBoard.getChessBoard().get("g8").getOccupant() == null &&

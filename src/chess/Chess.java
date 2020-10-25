@@ -2,7 +2,7 @@ package chess;
 
 /***
  * Main class for the chess game
- * @author malinthar
+ * @author ?
  */
 public class Chess {
     public static void main(String[] args) {

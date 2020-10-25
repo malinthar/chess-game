@@ -7,6 +7,9 @@ import java.util.Arrays;
 import java.util.List;
 
 
+/**
+ * Bishop chess piece.
+ */
 public class Bishop extends ChessPiece {
     public static final List<String> INITIAL_POSITIONS = Arrays.asList("c", "f");
     private static final String SYMBOL = "B";

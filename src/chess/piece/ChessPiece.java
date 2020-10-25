@@ -6,11 +6,15 @@ import chess.FileRank;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
+/**
+ * Chess piece in chess.
+ */
 public abstract class ChessPiece {
     protected FileRank currentPosition;
     protected String kind;
+
+    //list of possible moves of all chess pieces.
     protected static final String NORTH = "NORTH";
     protected static final String NORTH_EAST = "NORTH_EAST";
     protected static final String EAST = "EAST";
@@ -20,48 +24,78 @@ public abstract class ChessPiece {
     protected static final String WEST = "WEST";
     protected static final String NORTH_WEST = "NORTH_WEST";
     protected static final String LSHAPE = "LSHAPE";
-    protected static final String CASTLE = "CASTLE";
 
+    //stores the chess board to which the chess piece belongs.
     protected ChessBoard chessBoard;
-
-    public abstract Boolean move(FileRank toPosition, Boolean modifyPosition);
 
     public ChessPiece(String kind, ChessBoard chessBoard) {
         this.kind = kind;
         this.chessBoard = chessBoard;
     }
 
+    /**
+     * Perform a specified move and return if the move is valid.
+     *
+     * @param toPosition
+     * @param modifyPosition
+     * @return
+     */
+    public abstract Boolean move(FileRank toPosition, Boolean modifyPosition);
+
+    /**
+     * Sets the current position(FileRanK) of a chess piece.
+     *
+     * @param currentPosition
+     */
     public void setCurrentPosition(FileRank currentPosition) {
         this.currentPosition = currentPosition;
     }
 
+    /**
+     * Retruns the current position(FileRank) of a chess piece.
+     *
+     * @return
+     */
     public FileRank getCurrentPosition() {
         return this.currentPosition;
     }
 
+    /**
+     * Returns the kind of the chess piece.
+     *
+     * @return
+     */
     public String getKind() {
         return this.kind;
     }
 
+    /**
+     * Returns the unique symbol of the piece.
+     *
+     * @return
+     */
     public abstract String getSymbol();
 
     /**
      * Returns all valid moves for a particular ChessPiece object.
      *
-     * @param directions
-     * @param maxSteps
-     * @param fromPosition
-     * @param toFileRank
+     * @param directions   valid moving directions of the piece.
+     * @param maxSteps     maximum number of steps the piece can move along any direction.
+     * @param fromPosition current position of the piece.
+     * @param toFileRank   target/destination position of the piece.
      * @return
      */
     public List<String> getValidMoves(List<String> directions, int maxSteps,
                                       FileRank fromPosition, String toFileRank) {
+        //Set of valid moves
         List<String> validMoves = new ArrayList<>();
+
         String fromFile = fromPosition.getFileRank().get(FileRank.FILE_KEY);
         String fromRank = fromPosition.getFileRank().get(FileRank.RANK_KEY);
         int fileIndex = Arrays.asList(ChessBoard.FILES).indexOf(fromFile);
         int rankIndex = Arrays.asList(ChessBoard.RANKS).indexOf(fromRank);
 
+        //For each valid direction find out possible valid destinations and return the possible destinations.
         for (String direction : directions) {
             int steps;
             switch (direction) {
@@ -202,7 +236,7 @@ public abstract class ChessPiece {
     }
 
     /**
-     * Return if a particular move is valid
+     * Return if a particular move is obstructed by another piece.
      *
      * @param targetFileRank
      * @param toFileRank
@@ -226,6 +260,12 @@ public abstract class ChessPiece {
         return isValid;
     }
 
+    /**
+     * Return if a particular move of a chess piece causes a check to its king.
+     *
+     * @param toFileRank destination.
+     * @return
+     */
     public Boolean getIsKingChecked(String toFileRank) {
         Boolean isChecked;
         FileRank tempPosition = this.currentPosition;
@@ -244,6 +284,16 @@ public abstract class ChessPiece {
         return isChecked;
     }
 
+    /**
+     * Returns if the specified move is one of the possible moves of the chess
+     * piece in the current context.
+     *
+     * @param targetPositions set of possible moves in the current context.
+     * @param toFileRank      destination filerank as a string
+     * @param modifyPosition  whether to just check if its a valid move or to modify the position if its a valid move
+     * @param toPosition      destination filerank.
+     * @return
+     */
     public Boolean validateMoveAndUpdatePosition(List<String> targetPositions,
                                                  String toFileRank,
                                                  Boolean modifyPosition,

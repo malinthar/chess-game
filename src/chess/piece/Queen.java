@@ -6,6 +6,9 @@ import chess.FileRank;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Queen chess piece.
+ */
 public class Queen extends ChessPiece {
 
     public static final List<String> INITIAL_POSITIONS = Arrays.asList("d");
